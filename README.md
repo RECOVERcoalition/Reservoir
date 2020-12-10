@@ -1,5 +1,9 @@
 # Reservoir
 
+RECOVER coalition (Mila, Relation Therapeutics)
+
+This Recover repository is based on research funded by (or in part by) the Bill & Melinda Gates Foundation. The findings and conclusions contained within are those of the authors and do not necessarily reflect positions or policies of the Bill & Melinda Gates Foundation.
+
 This package stores the primary data acquisition scripts and the parsing pipelines for the main types of data in the RECOVER knowledge graph. It also provides an api for getting parsed data. This is **not** supposed to be used on the fly, it's just to get required data and save it in your dataset generation projects. This is because it is slow as it's constantly interacting with csv files
 
 ## Setup
