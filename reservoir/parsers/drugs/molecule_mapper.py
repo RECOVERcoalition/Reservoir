@@ -5,21 +5,21 @@ from rdkit.Chem.SaltRemover import SaltRemover
 
 # load the references for mapping
 drug_names = pd.read_csv(
-    rsv.RESEVOIR_DATA_FOLDER + "/parsed/drugs/drug_names.csv"
+    rsv.RESERVOIR_DATA_FOLDER + "/parsed/drugs/drug_names.csv"
 ).rename(columns={"name": "drug_name"})
 recover_to_drugbank = pd.read_csv(
-    rsv.RESEVOIR_DATA_FOLDER + "/parsed/drugs/recover_to_drugbank.csv"
+    rsv.RESERVOIR_DATA_FOLDER + "/parsed/drugs/recover_to_drugbank.csv"
 )
 recover_to_pubchem = pd.read_csv(
-    rsv.RESEVOIR_DATA_FOLDER + "/parsed/drugs/recover_to_pubchem.csv",
+    rsv.RESERVOIR_DATA_FOLDER + "/parsed/drugs/recover_to_pubchem.csv",
     dtype={"pubchem_cid": "str"},
 )
 recover_to_chembl = pd.read_csv(
-    rsv.RESEVOIR_DATA_FOLDER + "/parsed/drugs/recover_to_chembl.csv"
+    rsv.RESERVOIR_DATA_FOLDER + "/parsed/drugs/recover_to_chembl.csv"
 )
 
 recover_drugs = pd.read_csv(
-    rsv.RESEVOIR_DATA_FOLDER + "/parsed/drugs/recover_drugs.csv"
+    rsv.RESERVOIR_DATA_FOLDER + "/parsed/drugs/recover_drugs.csv"
 )
 
 
