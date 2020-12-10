@@ -1,4 +1,4 @@
-import reservoir as rdl
+import reservoir as rsv
 import pandas as pd
 import os
 import numpy as np
