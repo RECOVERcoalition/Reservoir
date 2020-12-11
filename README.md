@@ -8,8 +8,8 @@ This package stores the primary data acquisition scripts and the parsing pipelin
 
 ## Setup
 
--   Some files with the csv, tab, txt, obo, gaf and tsv are bigger than the 100MB limit and are being tracked with Git LFS. **Please install Git LFS** from here https://git-lfs.github.com/ . Installing, and then running step 1 should be enough.
--   In order to be able to use the package you need to run `python setup.py develop`
+-   Some files with the csv, tab, txt, obo, gaf and tsv are bigger than the 100MB limit and are being tracked with Git LFS. **Please install Git LFS** from here https://git-lfs.github.com/  **before** cloning the repository.
+-   In order to be able to use the package you need to run `python setup.py develop` within the Reservoir directory.
 
 ## Structure
 
