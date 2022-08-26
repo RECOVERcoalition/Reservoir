@@ -360,3 +360,72 @@ def get_drug_combo_data_combos(
         combo_data = combo_data.loc[combo_data.block_id.isin(set(block_ids))]
 
     return combo_data
+
+
+def get_cell_line_features(cell_line_names):
+    """ Get gene expression, mutation, and copy number variation features for some cell lines
+    """
+
+    # get mapper
+    cell_id_mapper = pd.read_csv(rsv.RESERVOIR_DATA_FOLDER + "/parsed/cell_lines/cell_line_aliases.csv")
+    cell_id_mapper = dict(zip(cell_id_mapper["alias"], cell_id_mapper["cell_line_id"]))
+
+    # clean and try to map to id
+    mapped_cell_lines = []
+    for name in cell_line_names:
+        if name not in cell_id_mapper:
+            print(name, "cell line could not be mapped")
+            continue
+
+        mapped_cell_lines.append(
+            {"cell_line_name": name, "cell_line_id": cell_id_mapper[name]}
+        )
+
+    mapped_cell_lines = pd.DataFrame(mapped_cell_lines)
+
+    # get expression data
+    cell_line_gene_expression = pd.read_csv(
+        rsv.RESERVOIR_DATA_FOLDER + "/parsed/cell_lines/cell_line_gene_expression.csv"
+    )
+    # add back the name of the requested cell line
+    cell_line_gene_expression = mapped_cell_lines[["cell_line_name", "cell_line_id"]].merge(
+        cell_line_gene_expression
+    )
+    del cell_line_gene_expression["cell_line_id"]
+    cell_line_gene_expression = cell_line_gene_expression.set_index("cell_line_name")
+    cell_lst = cell_line_gene_expression.index.tolist()
+
+    # get mutation data
+    cell_line_gene_mutation = pd.read_csv(
+        rsv.RESERVOIR_DATA_FOLDER + "/parsed/cell_lines/cell_line_gene_mutation.csv"
+    )
+    # add back the name of the requested cell line
+    cell_line_gene_mutation = mapped_cell_lines[["cell_line_name", "cell_line_id"]].merge(
+        cell_line_gene_mutation
+    )
+    del cell_line_gene_mutation["cell_line_id"]
+    cell_line_gene_mutation = cell_line_gene_mutation.set_index("cell_line_name").loc[cell_lst]
+
+    # get copy number data
+    cell_line_gene_cn = pd.read_csv(
+        rsv.RESERVOIR_DATA_FOLDER + "/parsed/cell_lines/cell_line_gene_copy_number.csv"
+    )
+    # add back the name of the requested cell line
+    cell_line_gene_cn = mapped_cell_lines[["cell_line_name", "cell_line_id"]].merge(
+        cell_line_gene_cn
+    )
+    del cell_line_gene_cn["cell_line_id"]
+    cell_line_gene_cn = cell_line_gene_cn.set_index("cell_line_name").loc[cell_lst]
+
+    # get cell metadata
+    cell_line_metadata = pd.read_csv(
+        rsv.RESERVOIR_DATA_FOLDER + "/parsed/cell_lines/cell_line_metadata.csv"
+    )
+    # add back the name of the requested cell line
+    cell_line_metadata = mapped_cell_lines[["cell_line_name", "cell_line_id"]].merge(
+        cell_line_metadata
+    )
+    del cell_line_metadata["cell_line_id"]
+    cell_line_metadata = cell_line_metadata.set_index("cell_line_name").loc[cell_lst]
+
+    return cell_line_gene_expression, cell_line_gene_mutation, cell_line_gene_cn, cell_line_metadata

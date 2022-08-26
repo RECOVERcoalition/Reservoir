@@ -165,3 +165,13 @@ combo_data = rsv.get_drug_combo_data_combos(qc_filtering='medium')
 # Almanac blocks DrugComb 1.4
 almanac = rsv.get_specific_drug_combo_blocks(study_name='ALMANAC')
 ```
+
+### Cell line data
+Returns expression data for cell lines from the cancer cell line encyclopedia. For each cell line the name is parsed and mapped to an internal mapping system. The results are the expression for each gene in the cell line, by hgcn name id
+
+```python
+import relation_data_lake as rdl
+
+# A375 and JHH1 are cell line names
+rsv.get_cell_line_features(["A375", "JHH1"])
+```
