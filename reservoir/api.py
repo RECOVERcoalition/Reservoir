@@ -178,11 +178,11 @@ def get_gene_ontology(
 
 def get_gene_onotology_embeddings(distance_from_root=2, evidence_category=None):
     """
-    Create embeddings for proteins based on wether a protein has a label or not
+    Create embeddings for proteins based on whether a protein has a label or not
 
     Args:
         distance_from_root: int indicating at which distance from the root we should make the embeddings
-        evidence_category: string filter for the type of evidence for the annotation. sugest using "experimental evidence"
+        evidence_category: string filter for the type of evidence for the annotation. suggest using "experimental evidence"
     """
 
     # get human proteins
@@ -220,34 +220,77 @@ def get_gene_onotology_embeddings(distance_from_root=2, evidence_category=None):
     return pd.concat([embeddings, missing_proteins_embeddings])
 
 
+def get_block_mask(
+        qc_filtering='high',
+):
+    """
+    Returns a DrugComb dataframe mask according to quality control level.
+
+    Args:
+        qc_filtering: Quality control filter leve. One of "high", "medium", or "off".
+    """
+    path = "/parsed/drug_combos/"
+
+    if qc_filtering == 'high':
+        block_mask = pd.read_csv(
+            rsv.RESERVOIR_DATA_FOLDER + path + "block_mask_hq.csv",
+        )
+    elif qc_filtering == 'medium':
+        block_mask = pd.read_csv(
+            rsv.RESERVOIR_DATA_FOLDER + path + "block_mask.csv",
+        )
+    elif qc_filtering == 'off':
+        block_mask = pd.read_csv(
+            rsv.RESERVOIR_DATA_FOLDER + path + "block_mask_hq.csv",
+        )
+        block_mask['mask'] = True
+
+    return block_mask
+
+
 def get_specific_drug_combo_blocks(
-    mono_row_measurements=None,
-    mono_col_measurements=None,
-    combo_measurements=None,
-    study_name=None,
-    cell_line_name=None,
+        mono_row_measurements=None,
+        mono_col_measurements=None,
+        combo_measurements=None,
+        study_name=None,
+        cell_line_name=None,
+        qc_filtering='high',
 ):
     """ Used to pre-select combo blocks by metadata.
+    Various types of heuristics were used to determine the quality of a block.
+    The parameter qc_filtering determines how many blocks are filtered out
+    according to these heuristics. Options are 'high' 'medium' 'off'
     """
-    summary_data = pd.read_csv(
-        rsv.RESERVOIR_DATA_FOLDER + "/parsed/drug_combos/summary_data.csv",
+
+    path = "/parsed/drug_combos/"
+
+
+    dc_summary_data = pd.read_csv(
+        rsv.RESERVOIR_DATA_FOLDER + path + "summary_data.csv",
         low_memory=False,
     )
+    dc_block_mask = get_block_mask(qc_filtering=qc_filtering)
+
+    # use mask to filter out low quality blocks
+    dc_block_mask = dc_block_mask.set_index('block_id').squeeze().reindex(dc_summary_data.block_id)
+    dc_summary_data = dc_summary_data.loc[dc_block_mask.values, :]
+
+    summary_data = dc_summary_data
 
     if not mono_row_measurements is None:
         summary_data = summary_data.loc[
             summary_data["mono_row_measurements"] == mono_row_measurements
-        ]
+            ]
 
     if not mono_col_measurements is None:
         summary_data = summary_data.loc[
             summary_data["mono_col_measurements"] == mono_col_measurements
-        ]
+            ]
 
     if not combo_measurements is None:
         summary_data = summary_data.loc[
             summary_data["combo_measurements"] == combo_measurements
-        ]
+            ]
 
     if not study_name is None:
         summary_data = summary_data.loc[summary_data["study_name"] == study_name]
@@ -255,15 +298,33 @@ def get_specific_drug_combo_blocks(
     if not cell_line_name is None:
         summary_data = summary_data.loc[
             summary_data["cell_line_name"] == cell_line_name
-        ]
+            ]
 
     return summary_data
 
 
-def get_drug_combo_data_monos(block_ids=None):
-    mono_data = pd.read_json(
-        rsv.RESERVOIR_DATA_FOLDER + "/parsed/drug_combos/mono_therapy.json"
+def get_drug_combo_data_monos(
+        block_ids=None,
+        qc_filtering='high',
+):
+    """Get mono therapy data.
+    Various types of heuristics were used to determine the quality of a block.
+    The parameter qc_filtering determines how many blocks are filtered out
+    according to these heuristics. Options are 'high' 'medium' 'off'
+    """
+
+    path = "/parsed/drug_combos/"
+
+    dc_mono_data = pd.read_json(
+        rsv.RESERVOIR_DATA_FOLDER + path + "mono_therapy.json"
     )
+    dc_block_mask = get_block_mask(qc_filtering=qc_filtering)
+
+    # use mask to filter out low quality blocks
+    dc_block_mask = dc_block_mask.set_index('block_id').squeeze().reindex(dc_mono_data.block_id)
+    dc_mono_data = dc_mono_data.loc[dc_block_mask.values, :]
+
+    mono_data = dc_mono_data
 
     if not block_ids is None:
         mono_data = mono_data.loc[mono_data.block_id.isin(set(block_ids))]
@@ -271,10 +332,29 @@ def get_drug_combo_data_monos(block_ids=None):
     return mono_data
 
 
-def get_drug_combo_data_combos(block_ids=None):
-    combo_data = pd.read_json(
-        rsv.RESERVOIR_DATA_FOLDER + "/parsed/drug_combos/combos.json"
+def get_drug_combo_data_combos(
+        block_ids=None,
+        qc_filtering='high',
+):
+    """ Get combination therapy data.
+    Various types of heuristics were used to determine the quality of a block.
+    The parameter qc_filtering determines how many blocks are filtered out
+    according to these heuristics. Options are 'high' 'medium' 'off'.
+    """
+
+    path = "/parsed/drug_combos/"
+
+    dc_combo_data = pd.read_json(
+        rsv.RESERVOIR_DATA_FOLDER + path + "combos.json"
     )
+    dc_block_mask = get_block_mask(qc_filtering=qc_filtering)
+
+    # use mask to filter out low quality blocks
+    dc_block_mask = dc_block_mask.set_index('block_id').squeeze().reindex(dc_combo_data.block_id)
+    dc_combo_data = dc_combo_data.loc[dc_block_mask.values, :]
+
+    combo_data = dc_combo_data
+
 
     if not block_ids is None:
         combo_data = combo_data.loc[combo_data.block_id.isin(set(block_ids))]

@@ -156,3 +156,12 @@ combo_data[['block_id', 'concentration_pairs']]
 # Synergy scores
 combo_data[['block_id', 'css_ri', 'synergy_zip', 'synergy_bliss', 'synergy_loewe', 'synergy_hsa', 'S']]
 ```
+
+Use argument version=1.5 or 1.4 to switch between new and old versions of DrugComb
+```python
+# DrugComb 1.5 combos with medium QC filters
+combo_data = rsv.get_drug_combo_data_combos(qc_filtering='medium')
+
+# Almanac blocks DrugComb 1.4
+almanac = rsv.get_specific_drug_combo_blocks(study_name='ALMANAC')
+```
