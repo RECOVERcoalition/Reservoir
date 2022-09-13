@@ -429,3 +429,22 @@ def get_cell_line_features(cell_line_names):
     cell_line_metadata = cell_line_metadata.set_index("cell_line_name").loc[cell_lst]
 
     return cell_line_gene_expression, cell_line_gene_mutation, cell_line_gene_cn, cell_line_metadata
+
+
+def get_inhouse_data(experiment_round):
+    """
+    Get experimental data generated in house
+    """
+    # Check if requested round is available
+    available_rounds = np.arange(1, 6)
+    if experiment_round not in available_rounds:
+        raise ValueError(f"Experiment round {experiment_round} not available, choose one of: {available_rounds}")
+
+    # Get path to file
+    folder = "/parsed/drug_combos/oncology_data/"
+    file_name = "oncology_combos_round" + str(experiment_round) + ".csv"
+    parsed_file = rsv.RESERVOIR_DATA_FOLDER + folder + file_name
+
+    combo_data = pd.read_csv(parsed_file)
+
+    return combo_data
