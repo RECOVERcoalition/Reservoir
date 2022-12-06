@@ -1,4 +1,4 @@
-import recover_data_lake as rdl
+import reservoir as rsv
 import os
 import pandas as pd
 import pickle
@@ -6,55 +6,9 @@ import networkx as nx
 import itertools
 
 
-# """
-# Parse Tron
-# """
-# tron_folder = hgnc_data = rdl.RELATION_DATA_FOLDER + "/raw/cell_lines/tron_crawl"
-# parsed_tron_files = []
-# for file in os.listdir(tron_folder):
-#     if not ".csv" in file:
-#         continue
-#
-#     cell_line = file.replace(".csv", "")
-#
-#     try:
-#         # recognize gene and keep not null ones
-#         tron_file = pd.read_csv(tron_folder + "/" + file)
-#         tron_file["gene_hgnc_id"] = tron_file["gene"].apply(rdl.recognize_gene_id)
-#         tron_file = tron_file.loc[
-#             ~tron_file["gene_hgnc_id"].isna(), ["gene_hgnc_id", "expression"]
-#         ]
-#
-#         # some genes appear twice
-#         tron_file = tron_file.sort_values(
-#             "expression", ascending=False
-#         ).drop_duplicates("gene_hgnc_id")
-#         tron_file["cell_line"] = cell_line
-#
-#         parsed_tron_files.append(tron_file)
-#     except:
-#         print(f"Failed cell line {cell_line}")
-#
-#
-# # combine all of the cell lines, and make the gene the column names
-# parsed_tron_files = pd.concat(parsed_tron_files)
-# parsed_tron_files = parsed_tron_files.set_index(["cell_line", "gene_hgnc_id"]).unstack(
-#     -1
-# )["expression"]
-#
-# # convert TPM
-# parsed_tron_files = parsed_tron_files.apply(
-#     lambda row: row / row.sum() * 10 ** 6, axis=1
-# )
-#
-# parsed_tron_files = parsed_tron_files.reset_index()
-# parsed_tron_files["cell_line_id"] = parsed_tron_files["cell_line"].apply(
-#     map_cell_line_name
-# )
-
 from create_cell_line_db import clean_cell_line_name
 
-with open(rdl.RECOVER_DATA_FOLDER + "/parsed/cell_lines/cd.pickle", "rb") as f:
+with open(rsv.RESERVOIR_DATA_FOLDER + "/parsed/cell_lines/cd.pickle", "rb") as f:
     cd = pickle.load(f)
 
 
@@ -71,10 +25,10 @@ EBI RNA-seq of cancer cell lines
 """
 # load and recognize gene ids. keep ones with valid ids
 ccce = pd.read_csv(
-    rdl.RECOVER_DATA_FOLDER + "/raw/cell_lines/E-MTAB-2770-query-results.tpms.tsv",
+    rsv.RESERVOIR_DATA_FOLDER + "/raw/cell_lines/E-MTAB-2770-query-results.tpms.tsv",
     sep="\t",
 )
-ccce["gene_hgnc_id"] = ccce["Gene Name"].apply(rdl.hgnc_normalize)
+ccce["gene_hgnc_id"] = ccce["Gene Name"].apply(rsv.hgnc_normalize)
 ccce = ccce.loc[~ccce["gene_hgnc_id"].isna()]
 ccce = ccce[ccce.columns[2:]]
 
@@ -98,6 +52,6 @@ ccce["cell_line_id"] = ccce["cell_line"].apply(map_cell_line_name)
 ccce = ccce.loc[~ccce["cell_line_id"].isna()]
 
 ccce.to_csv(
-    rdl.RECOVER_DATA_FOLDER + "/parsed/cell_lines/cancer_cell_encyclopedia.csv",
+    rsv.RESERVOIR_DATA_FOLDER + "/parsed/cell_lines/cancer_cell_encyclopedia.csv",
     index=False,
 )
